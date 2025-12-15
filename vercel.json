@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/sync-order-status",
-      "schedule": "0 */1 * * *",
+      "schedule": "0 0 */1 * *",
       "headers": {
         "Authorization": "Bearer your-random-secret-key-123"
       }
