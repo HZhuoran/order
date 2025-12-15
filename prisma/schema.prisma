@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"  # 若使用PostgreSQL，改为"postgresql"
+  url      = env("DATABASE_URL")
+}
+
+# 订单表模型
+model Order {
+  orderId     String    @id @unique  # 订单ID（与已有系统保持一致）
+  waybillNo   String    # 运单号
+  courierCode String    # 快递公司编码（如SF=顺丰，YTO=圆通）
+  status      OrderStatus  # 订单状态
+  createTime  DateTime  @default(now())  # 创建时间
+  updateTime  DateTime  @updatedAt  # 更新时间
+  statusLogs  OrderStatusLog[]  # 关联的状态变更日志
+}
+
+# 订单状态枚举（与已有系统保持一致）
+enum OrderStatus {
+  PENDING        # 待配送
+  SHIPPED        # 已发货
+  DELIVERED      # 已送达
+  DELIVERY_FAILED # 配送失败
+}
+
+# 订单状态变更日志表（用于追溯状态变更记录）
+model OrderStatusLog {
+  logId      String      @id @default(cuid())  # 日志ID（自动生成）
+  orderId    String      # 关联的订单ID
+  oldStatus  OrderStatus # 变更前状态
+  newStatus  OrderStatus # 变更后状态
+  operateTime DateTime   @default(now())  # 操作时间
+  order      Order       @relation(fields: [orderId], references: [orderId], onDelete: Cascade)
+}
+
+# 物流查询失败记录表（用于重试机制）
+model LogisticsFailRecord {
+  id          String    @id @default(cuid())
+  orderId     String    @unique  # 关联订单ID
+  waybillNo   String    # 运单号
+  courierCode String    # 快递公司编码
+  failCount   Int       @default(1)  # 失败次数
+  lastFailTime DateTime @default(now())  # 最后失败时间
+}
