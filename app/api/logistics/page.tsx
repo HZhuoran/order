@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
-// 导入全局CSS
+// 导入Tailwind全局样式（已配置无需额外原生CSS）
 import '@/app/globals.css';
 
 // 常用快递公司映射（系统编码 -> 名称）
@@ -17,14 +17,14 @@ const COURIER_OPTIONS = [
   { value: 'Cainiao', label: '菜鸟驿站' },
 ];
 
-// 物流状态样式映射（对应CSS类名）
+// 物流状态样式映射（对应Tailwind类名）
 const STATUS_CLASS_MAP = {
-  '已送达': 'status-delivered',
-  '运输中': 'status-in-transit',
-  '配送失败': 'status-failed',
-  '状态未知': 'status-unknown',
-  '查询中': 'status-querying',
-  '查询失败': 'status-failed',
+  '已送达': 'bg-success/10 text-success',
+  '运输中': 'bg-primary/10 text-primary',
+  '配送失败': 'bg-danger/10 text-danger',
+  '状态未知': 'bg-gray-500/10 text-gray-500',
+  '查询中': 'bg-warning/10 text-warning',
+  '查询失败': 'bg-danger/10 text-danger',
 };
 
 // 单个物流查询项类型
@@ -39,31 +39,29 @@ interface LogisticsItem {
 }
 
 // 并发查询工具函数（控制并发数量）
-const concurrentRequest = async <T>(
+// 并发查询工具函数（控制并发数量）
+// 并发查询工具函数（控制并发数量）
+const concurrentRequest = async function <T>(
   requests: (() => Promise<T>)[],
   limit = 3
-): Promise<T[]> => {
+): Promise<T[]> {
+  // 去掉 =>，直接写 {} 函数体
   const results: T[] = [];
-  const executing: Promise<void>[] = [];
+  let executing: Promise<void>[] = [];
 
   for (const request of requests) {
-    // 执行单个请求
     const promise = request().then((result) => {
       results.push(result);
-      // 从执行队列中移除已完成的请求
-      const index = executing.findIndex((p) => p === promise);
+      const index = executing.indexOf(promise);
       if (index !== -1) executing.splice(index, 1);
     });
-
     executing.push(promise);
 
-    // 控制并发数量
     if (executing.length >= limit) {
       await Promise.race(executing);
     }
   }
 
-  // 等待所有请求完成
   await Promise.all(executing);
   return results;
 };
@@ -253,100 +251,141 @@ export default function LogisticsQueryPage() {
     }
   };
 
-  return (物流单号批量查询
-
-      {/* 查询表单区域 */}
-      <textarea
-            id="waybillInput"
-            value={ onChange={handleWaybillChange}
-            placeholder="请输入物流单号，例如：
-YT1234567890123
-SF9876543210987"
-            disabled={isQuerying}
-          /><select
-              id="courierSelect"
-              value={ setDefaultCourier(e.target.value)}
-              disabled={isQuerying}
-            >
-              {COURIER_OPTIONS.map(option => (
-                <option key={.value} value={option.value}>
-                  {option.label}
-                
-              ))}
-            <button
-              className="btn btn-primary"
-              onClick={ing}
-            >
-              {isQuerying ? '查询中...' : '批量查询'}
-           <button
-              className="btn btn-secondary"
-              onClick={清空
-             {/* 查询进度条（查询中显示） */}
-        {isQuerying && (
-          查询进度{queryProgress}%<div
-                className="progress-fill"
-                style={queryProgress}%` }}
-              >
-        )}
+//   return (
+    
+//         物流单号批量查询
       
 
-      {/* 查询结果区域 */}
-      {queryList.length > 0 && (
-        
-            查询结果
-            共{queryList.length}条记录物流单号快递公司物流状态状态更新时间操作 {queryList.map((item, index) => (
-                  <tr key={ + item.waybillNo}>
-                    {item.waybillNo}
-                      {!isQuerying && (
-                       <select
-                          value={ handleCourierChange(item.waybillNo, e.target.value)}
-                          style={{ maxWidth: '150px' }}
-                        >
-                          {COURIER_OPTIONS.map(option => (
-                            <option key={={option.value}>
-                              {option.label}
-                           
-                          ))}
-                        
-                      )}
-                      {isQuerying && {item.courierLabel}}
-                    <span className={]}`}>
-                        {item.status}
-                      
-                      {item.message && (
-                        {item.message} )}
-                    {item.formattedTime || '-'}<a
-                        className="text-primary"
-                        onClick={ reQueryItem(item)}
-                        style={{ pointerEvents: isQuerying ? 'none' : 'auto' }}
-                      >
-                        重新查询
-                      
-                ))}
-              
-      )}
+//       {/* 查询表单区域 */}
+      
+//           查询配置
+//           支持多单号批量输入，每行一个<textarea
+//               id="waybillInput"
+//               value={请输入物流单号，例如：
+// YT1234567890123
+// SF9876543210987"
+//               disabled={isQuerying}
+//               className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary transition-all resize-y min-h-[120px]"
+//             />
+//           <select
+//               id="courierSelect"
+//               value={ setDefaultCourier(e.target.value)}
+//               disabled={isQuerying}
+//               className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+//             >
+//               {COURIER_OPTIONS.map(option => (<option key={
+//                   {option.label}
+                
+//               ))}
+//             <button
+//               className="btn btn-primary flex-1"
+//               onClick={
+//               disabled={isQuerying}
+//             >
+//               {isQuerying ? '查询中...' : '批量查询'}
+//             <button
+//               className="btn btn-secondary flex-1"
+//               onClick={}
+//               disabled={isQuerying}
+//             >
+//               清空
+           
 
-      {/* 查询历史区域 */}
-      {historyList.length > 0 && (
-            查询历史<a
-              className="text-sm text-gray-500"
-              onClick={: 'pointer' }}
-            >
-              清空历史
-            物流单号快递公司物流状态状态更新时间操作
-                {historyList.map((item, index) => (
-                  <tr key={{item.waybillNo}{item.courierLabel}<span className={adge ${STATUS_CLASS_MAP[item.status]}`}>
-                        {item.status}
-{item.formattedTime || '-'}<a
-                        className="text-primary"
-                        onClick={ reQueryItem(item)}
-                        style={{ pointerEvents: isQuerying ? 'none' : 'auto' }}
-                      >
-                        重新查询
+//         {/* 查询进度条（查询中显示） */}
+//         {isQuerying && (
+//           查询进度{queryProgress}%<div
+//                 className="progress-fill"
+//                 style={              >
+//         )}
+
+//       {/* 查询结果区域 */}
+//       {queryList.length > 0 && (
+        
+//             查询结果 共{queryList.length}条记录 物流单号
+                  
+//                     快递公司
+                  
+//                     物流状态
+                  
+//                     状态更新时间 操作
+                  
+//                 {queryList.map((item, index) => (
+//                   <tr key={0">
+                    
+//                       {item.waybillNo}
+                    
+//                       {!isQuerying ? (
+//                         <select
+//                           value={.courierCode}
+//                           onChange={(e) => handleCourierChange(item.waybillNo, e.target.value)}
+//                           className="border border-gray-300 rounded-md p-1 text-sm focus:ring-2 focus:ring-primary focus:border-primary"
+//                         >
+//                           {COURIER_OPTIONS.map(option => (
+//                             <option key={
+//                               {option.label}
+                            
+//                           ))}
+//                       ) : (
+//                        {item.courierLabel}
+//                       )}
+//                     <span className={[item.status]}`}>
+//                         {item.status}
                       
-                ))}
+//                       {item.message && (
+//                         {item.message}
+//                       )}
+//  {item.formattedTime || '-'}
+//                     <button
+//                         onClick={ reQueryItem(item)}
+//                         disabled={isQuerying}
+//                         className="text-primary hover:text-primary/80 font-medium"
+//                         style={{ pointerEvents: isQuerying ? 'none' : 'auto' }}
+//                       >
+//                         重新查询
+
+//                 ))}
               
-      )}
+//       )}
+
+//       {/* 查询历史区域 */}
+//       {historyList.length > 0 && (
+        
+//             查询历史
+//             <button
+//               onClick={-sm text-gray-500 hover:text-danger"
+//               style={{ cursor: isQuerying ? 'not-allowed' : 'pointer' }}
+//             >
+//               清空历史
+//                                 物流单号
+                  
+//                     快递公司
+                  
+//                     物流状态
+                  
+//                     状态更新时间
+//                                       操作
+                  
+//                 {historyList.map((item, index) => (
+//                   <tr key={-50">
+                    
+//                       {item.waybillNo}
+                    
+//                       {item.courierLabel}
+//                    <span className={_CLASS_MAP[item.status]}`}>
+//                         {item.status}
+                      
+//                       {item.formattedTime || '-'}
+//                     <button
+//                         onClick={ reQueryItem(item)}
+//                         disabled={isQuerying}
+//                         className="text-primary hover:text-primary/80 font-medium"
+//                         style={{ pointerEvents: isQuerying ? 'none' : 'auto' }}
+//                       >
+//                         重新查询
+                      
+//                 ))}
+              
+//       )}
     
-  );
+//   );
 }

@@ -1,26 +1,30 @@
-@import "tailwindcss";
+/* 1. 引入 Inter 字体（CDN 方式，确保全局可访问） */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* 2. Tailwind 核心指令（必须加分号） */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* 3. 全局基础样式 - 用 @layer base 包裹（v3 推荐写法） */
+@layer base {
+  body {
+    /* 这里的 font-inter 对应配置里的 fontFamily.inter */
+    font-family: Inter, system-ui, sans-serif;
+    @apply bg-gray-100 text-gray-800 m-0 p-0 box-border;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  a {
+    @apply text-primary hover:text-primary/80 transition-colors;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* 4. 自定义组件类（可选） */
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-md font-medium transition-all;
+  }
+  .btn-primary {
+    @apply bg-primary text-white hover:bg-primary/90;
+  }
 }

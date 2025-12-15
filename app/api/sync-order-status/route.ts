@@ -4,7 +4,6 @@ import logger from '@/lib/logger';
 import { getPendingOrders, updateOrderStatus, saveLogisticsFailRecord } from '@/lib/order';
 import { queryLogisticsStatus, LogisticsStatus } from '@/lib/logistics';
 
-// 初始化Prisma客户端
 const prisma = new PrismaClient();
 
 // 支持GET请求（Vercel定时任务通过GET触发）
